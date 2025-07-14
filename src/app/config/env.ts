@@ -5,7 +5,7 @@ dotenv.config();
 interface envVariablesTypes {
     PORT: string;
     DB_URL: string;
-    NODE_ENV: string;
+    NODE_ENV: "production" | "development";
 }
 
 function loadEnvVariables(): envVariablesTypes {
@@ -18,7 +18,7 @@ function loadEnvVariables(): envVariablesTypes {
     return {
         PORT: process.env.PORT as string,
         DB_URL: process.env.DB_URL as string,
-        NODE_ENV: process.env.NODE_ENV as string
+        NODE_ENV: process.env.NODE_ENV as "production" | "development"
     }
 }
 
