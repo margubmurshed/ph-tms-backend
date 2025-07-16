@@ -13,8 +13,13 @@ export enum IsActive{
     BLOCKED="BLOCKED"
 }
 
+export enum Providers{
+    GOOGLE="GOOGLE",
+    CREDENTIALS="CREDENTIALS"
+}
+
 export interface IAuthProvider {
-    provider: string;
+    provider: Providers;
     providerId: string;
 }
 
