@@ -32,9 +32,10 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
     }
 
     // User is present and password is correct. So, generating access token
-    const accessToken = generateToken(jwtPayload, envVariables.JWT_ACCESS_SECRET, envVariables.JWT_ACCESS_EXPIRES)
+    const accessToken = generateToken(jwtPayload, envVariables.JWT_ACCESS_SECRET, envVariables.JWT_ACCESS_EXPIRES);
+    const refreshToken = generateToken(jwtPayload, envVariables.JWT_REFRESH_SECRET, envVariables.JWT_REFRESH_EXPIRES);
 
-    return { accessToken };
+    return { accessToken, refreshToken };
 }
 
 export const AuthServices = {
