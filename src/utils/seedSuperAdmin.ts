@@ -32,7 +32,7 @@ const seedSuperAdmin = async () => {
             providerId: superAdminEmail as string
         }
 
-        const payload: IUser = {
+        const payload: Partial<IUser> = {
             name: "Super Admin",
             email: superAdminEmail,
             password: hashedPassword,
