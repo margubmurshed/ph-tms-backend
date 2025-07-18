@@ -7,11 +7,12 @@ import cookieParser from "cookie-parser";
 import passport from "passport";
 import expressSession from "express-session";
 import "./app/config/passport";
+import { envVariables } from "./app/config/env";
 
 const app = express();
 
 app.use(expressSession({
-    secret: "express-session-secret",
+    secret: envVariables.EXPRESS_SESSION_SECRET,
     resave: false,
     saveUninitialized: false
 }));
