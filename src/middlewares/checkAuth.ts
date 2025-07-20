@@ -19,7 +19,6 @@ const checkAuth = (...authRoles: Role[]) => {
             const payload = verifyToken(accessToken, envVariables.JWT_ACCESS_SECRET) as JwtPayload;
 
             const user = await User.findById(payload.userId);
-
             if (!user) {
                 throw new AppError("User doesn't exist", httpStatus.BAD_REQUEST);
             }
