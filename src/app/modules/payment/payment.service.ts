@@ -8,10 +8,10 @@ import httpStatus from "http-status-codes";
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
 
-const initPayment = async(bookingId: string) => {
-    const payment = await Payment.findOne({booking: bookingId});
+const initPayment = async (bookingId: string) => {
+    const payment = await Payment.findOne({ booking: bookingId });
 
-    if(!payment){
+    if (!payment) {
         throw new AppError("Payment not found! You might not have initiated booking for this tour!", httpStatus.NOT_FOUND);
     }
 
@@ -20,14 +20,14 @@ const initPayment = async(bookingId: string) => {
     const user = booking?.user as any;
 
     const sslPayload: ISSLCommerz = {
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                address: user.address,
-                amount: payment.amount,
-                transactionId: payment.transactionId
-            }
-    
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        amount: payment.amount,
+        transactionId: payment.transactionId
+    }
+
     const sslPayment = await SSLService.sslPaymentInit(sslPayload);
     return {
         paymentURL: sslPayment.GatewayPageURL
@@ -46,8 +46,8 @@ const successPayment = async (query: Record<string, string>) => {
         ).session(session);
 
         await Booking.findByIdAndUpdate(
-            updatedPayment?.booking, 
-            { status: BookingStatus.COMPLETED }, 
+            updatedPayment?.booking,
+            { status: BookingStatus.COMPLETED },
             { runValidators: true }
         ).session(session)
 
@@ -60,13 +60,13 @@ const successPayment = async (query: Record<string, string>) => {
     } catch (error) {
         session.abortTransaction();
         throw error;
-    } finally{
+    } finally {
         session.endSession();
     }
 }
 
 const failPayment = async (query: Record<string, string>) => {
-const session = await mongoose.startSession();
+    const session = await mongoose.startSession();
 
     session.startTransaction();
     try {
@@ -77,8 +77,8 @@ const session = await mongoose.startSession();
         ).session(session);
 
         await Booking.findByIdAndUpdate(
-            updatedPayment?.booking, 
-            { status: BookingStatus.FAILED }, 
+            updatedPayment?.booking,
+            { status: BookingStatus.FAILED },
             { runValidators: true }
         ).session(session)
 
@@ -91,13 +91,13 @@ const session = await mongoose.startSession();
     } catch (error) {
         session.abortTransaction();
         throw error;
-    } finally{
+    } finally {
         session.endSession();
     }
 }
 
 const cancelPayment = async (query: Record<string, string>) => {
-const session = await mongoose.startSession();
+    const session = await mongoose.startSession();
 
     session.startTransaction();
     try {
@@ -108,8 +108,8 @@ const session = await mongoose.startSession();
         ).session(session);
 
         await Booking.findByIdAndUpdate(
-            updatedPayment?.booking, 
-            { status: BookingStatus.CANCELLED }, 
+            updatedPayment?.booking,
+            { status: BookingStatus.CANCELLED },
             { runValidators: true }
         ).session(session)
 
@@ -122,7 +122,7 @@ const session = await mongoose.startSession();
     } catch (error) {
         session.abortTransaction();
         throw error;
-    } finally{
+    } finally {
         session.endSession();
     }
 }

@@ -17,31 +17,46 @@ const createBooking = catchAsync(async (req: Request, res: Response) => {
 })
 
 const getAllBookings = catchAsync(async (req: Request, res: Response) => {
-    const booking = await BookingService.getAllBookings();
+    const query = req.query as Record<string, string>;
+    const result = await BookingService.getAllBookings(query);
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
         message: "Booking created successfully",
-        data: booking
+        data: result.data,
+        meta: result.meta
     })
 })
 
 const getUserBookings = catchAsync(async (req: Request, res: Response) => {
-    const booking = await BookingService.getUserBookings();
+    const user = req.user as JwtPayload;
+    const result = await BookingService.getUserBookings(user.userId);
     sendResponse(res, {
-        statusCode: httpStatus.CREATED,
+        statusCode: httpStatus.OK,
         success: true,
-        message: "Booking created successfully",
-        data: booking
+        message: "User bookings retrieved successfully!",
+        data: result
     })
 })
 const getSingleBooking = catchAsync(async (req: Request, res: Response) => {
-    const booking = await BookingService.getSingleBooking();
+    const bookingId = req.params.bookingId;
+    const booking = await BookingService.getSingleBooking(bookingId);
     sendResponse(res, {
-        statusCode: httpStatus.CREATED,
+        statusCode: httpStatus.OK,
         success: true,
-        message: "Booking created successfully",
+        message: "Booking retrieved successfully!",
         data: booking
+    })
+})
+
+const updateBookingStatus = catchAsync(async (req: Request, res: Response) => {
+    const bookingId = req.params.bookingId;
+    const result = await BookingService.updateBookingStatus(bookingId ,req.body);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Booking status updated successfully",
+        data: result
     })
 })
 
@@ -49,5 +64,6 @@ export const bookingController = {
     createBooking,
     getAllBookings,
     getUserBookings,
-    getSingleBooking
+    getSingleBooking,
+    updateBookingStatus
 };

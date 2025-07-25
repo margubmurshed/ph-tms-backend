@@ -36,7 +36,7 @@ router.patch(
     "/:bookingId/status",
     checkAuth(...Object.values(Role)),
     validateRequest(updateBookingStatusZodSchema),
-    bookingController.getSingleBooking
+    bookingController.updateBookingStatus
 );
 
 

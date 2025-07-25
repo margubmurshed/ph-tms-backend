@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-
 import AppError from "../../errorHelpers/AppError";
 import { User } from "../user/user.model";
 import httpStatus from "http-status-codes";
 import { Booking } from "./booking.model";
 import z from "zod";
-import { createBookingZodSchema } from "./booking.validation";
+import { createBookingZodSchema, updateBookingStatusZodSchema } from "./booking.validation";
 import { Payment } from "../payment/payment.model";
 import { PaymentStatus } from "../payment/payment.interface";
 import { BookingStatus } from "./booking.interface";
@@ -13,6 +11,7 @@ import { Tour } from "../tour/tour.model";
 import mongoose from "mongoose";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
+import { QueryBuilder } from "../../../utils/QueryBuilder";
 
 const getTransactionId = () => {
     // This function should generate a unique transaction ID
@@ -77,8 +76,6 @@ const createBooking = async (payload: z.infer<typeof createBookingZodSchema>, us
         }
 
         const sslPayment = await SSLService.sslPaymentInit(sslPayload);
-
-        
         
         await session.commitTransaction();
         return {
@@ -93,13 +90,50 @@ const createBooking = async (payload: z.infer<typeof createBookingZodSchema>, us
         session.endSession();
     }
 }
-const getAllBookings = async () => { }
-const getUserBookings = async () => { }
-const getSingleBooking = async () => { }
+const getAllBookings = async (query: Record<string, string>) => {
+    const queryBuilder = new QueryBuilder(Booking.find(), query);
+    const bookings = queryBuilder.filter().fields().sort().paginate();
+    const [data, meta] = await Promise.all([
+        bookings.build(),
+        bookings.getMetaData(),
+    ])
+    return {data, meta};
+}
+
+const getUserBookings = async (userId: string) => {
+    const bookings = await Booking.find({user: userId });
+    return bookings;
+}
+
+const getSingleBooking = async (bookingId: string) => {
+    const isValid = mongoose.Types.ObjectId.isValid(bookingId);
+    if(!isValid){
+        throw new AppError("Invalid booking id! Please provide valid id", httpStatus.BAD_REQUEST);
+    }
+
+    const booking = await Booking.findById(bookingId);
+    if(!booking){
+        throw new AppError("No booking found by this booking id!", httpStatus.NOT_FOUND);
+    }
+    return booking;
+}
+
+const updateBookingStatus = async(bookingId: string, payload: z.infer<typeof updateBookingStatusZodSchema>) => {
+    const booking = await Booking.findById(bookingId);
+    if(!booking){
+        throw new AppError("No booking found!", httpStatus.NOT_FOUND);
+    }
+
+    booking.status = payload.status as BookingStatus;
+    await booking.save();
+
+    return booking;
+}
 
 export const BookingService = {
     createBooking,
     getAllBookings,
     getUserBookings,
-    getSingleBooking
+    getSingleBooking,
+    updateBookingStatus
 }
