@@ -24,4 +24,5 @@ export interface ITour{
     minGuests?: number;
     division: Types.ObjectId; // Reference to the division
     tourType: Types.ObjectId; // Reference to the tour type
+    deletedImages: string[];
 }

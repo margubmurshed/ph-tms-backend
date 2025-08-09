@@ -1,10 +1,11 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from "passport";
 import { Strategy as GoogleStategy, Profile, VerifyCallback } from "passport-google-oauth20";
 import { envVariables } from "./env";
 import { User } from "../modules/user/user.model";
-import { Providers, Role } from "../modules/user/user.interface";
+import { IsActive, Providers, Role } from "../modules/user/user.interface";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcryptjs from "bcryptjs";
 
@@ -17,6 +18,18 @@ passport.use(
             const user = await User.findOne({ email });
             if (!user) {
                 return done(null, false, { message: "User doesn't exist" })
+            }
+
+            if (user.isActive === IsActive.BLOCKED || user.isActive === IsActive.INACTIVE) {
+                return done(`User is ${user.isActive}`);
+            }
+
+            if (user.isDeleted) {
+                return done("User is deleted");
+            }
+
+            if (!user.isVerified) {
+                return done("User is not verified")
             }
 
             const isGoogleAuthenticated = user!.auths.some(providerObject => providerObject.provider === Providers.GOOGLE);
@@ -68,6 +81,20 @@ passport.use(
                 providerId: profile.id
             }
 
+            if (user) {
+                if (user.isActive === IsActive.BLOCKED || user.isActive === IsActive.INACTIVE) {
+                    return done(`User is ${user.isActive}`);
+                }
+
+                if (user.isDeleted) {
+                    return done("User is deleted");
+                }
+
+                if (!user.isVerified) {
+                    return done("User is not verified")
+                }
+            }
+
             if (!user) {
                 user = await User.create({
                     name: profile.displayName,
@@ -81,11 +108,13 @@ passport.use(
                 const doesGoogleAuthProviderExist = user.auths.some(providerObject => providerObject.provider === Providers.GOOGLE);
                 if (!doesGoogleAuthProviderExist) {
                     user.auths.push(googleProvider);
+                    user.isVerified = true;
                     await user.save();
                 }
             }
 
             const responseUser = {
+                _id: user._id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
@@ -104,11 +133,16 @@ passport.use(
 
 // save user ID to session
 passport.serializeUser((user: any, done: (err: any, id: any) => void) => {
+    console.log("Logging in user:", user);
     done(null, user._id);
 })
 passport.deserializeUser(async (id: any, done: (err: any, id: any) => void) => {
+    try {
     const user = await User.findById(id);
     done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
 })
 
 

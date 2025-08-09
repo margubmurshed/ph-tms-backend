@@ -11,11 +11,21 @@ import { handleMongooseDuplicateError } from "../app/helpers/handleMongooseDupli
 import { handleMongooseValidationError } from "../app/helpers/handleMongooseValidationError";
 import { handleMongooseCastError } from "../app/helpers/handleMongooseCastError";
 import { handleZodError } from "../app/helpers/handleZodError";
+import { deleteImageFromCloudinary } from "../app/config/cloudinary.config";
 
-export const globalErrorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
+export const globalErrorHandler = async(error: any, req: Request, res: Response, next: NextFunction) => {
     let statusCode = httpStatus.INTERNAL_SERVER_ERROR;
     let message = "Something went wrong!";
-    let errorSources: TErrorSource[] = []
+    let errorSources: TErrorSource[] = [];
+
+    if(req.file){
+        await deleteImageFromCloudinary(req.file.path);
+    }
+
+    if(req.files && Array.isArray(req.files) && req.files.length > 0){
+        const paths = req.files.map(file => file.path);
+        await Promise.all(paths.map(path => deleteImageFromCloudinary(path)));
+    }
 
     if (error.code === 11000) {
         const errorObject = handleMongooseDuplicateError(error);

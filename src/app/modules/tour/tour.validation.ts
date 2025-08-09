@@ -79,5 +79,11 @@ export const createTourZodSchema = z.object({
         .max(24, { message: "Division ID cannot exceed 24 characters." })
 })
 
-export const updateTourZodSchema = createTourZodSchema.partial().omit({ tourType: true, division: true }).strip();
+export const updateTourZodSchema = createTourZodSchema
+.partial()
+.omit({ tourType: true, division: true })
+.extend({
+    deletedImages: z.array(z.string()).optional()
+})
+.strip();
 // strips extra fields silently;

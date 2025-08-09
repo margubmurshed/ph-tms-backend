@@ -12,12 +12,7 @@ import mongoose from "mongoose";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
-
-const getTransactionId = () => {
-    // This function should generate a unique transaction ID
-    // For simplicity, we can use a timestamp or a UUID generator
-    return `txn_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-}
+import { getTransactionId } from "../../../utils/getTransactionId";
 
 const createBooking = async (payload: z.infer<typeof createBookingZodSchema>, userId: string) => {
     const session = await mongoose.startSession();

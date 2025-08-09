@@ -4,6 +4,7 @@ import { ITour, ITourType } from "./tour.interface"
 import { Tour, TourType } from "./tour.model"
 import httpStatus from "http-status-codes";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 
 const createTourType = async (payload: ITourType) => {
     const doesTourTypeExist = await TourType.findOne({ name: payload.name });
@@ -122,10 +123,33 @@ const updateTour = async (tourId: string, payload: Partial<ITour>) => {
         throw new AppError("Tour not found", httpStatus.NOT_FOUND);
     }
 
+    const existingImages = Array.isArray(doesTourExist.images) ? [...doesTourExist.images] : [];
+    const isImageUploaded = Array.isArray(payload.images) && payload.images.length > 0;
+    const uploadedImages = isImageUploaded ? [...payload.images as string[]] : [];
+
+    let filteredOldImages = existingImages;
+
+    // remove deleted urls
+    if (Array.isArray(payload.deletedImages) && payload.deletedImages.length) {
+        filteredOldImages = existingImages.filter((imageURL: string) => !payload.deletedImages?.includes(imageURL))
+    }
+    payload.images = [...filteredOldImages, ...uploadedImages];
+
     const updatedTour = await Tour.findByIdAndUpdate(tourId, payload, {
         new: true,
         runValidators: true
     });
+
+    if (
+        Array.isArray(payload.deletedImages) &&
+        payload.deletedImages.length &&
+        existingImages.length
+    ) {
+        const deletableImages = payload.deletedImages.filter((url) => existingImages.includes(url));
+        if(deletableImages.length){
+            await Promise.all(deletableImages.map(imageURL => deleteImageFromCloudinary(imageURL)));
+        }
+    }
 
     return updatedTour;
 }

@@ -31,6 +31,10 @@ const checkAuth = (...authRoles: Role[]) => {
                 throw new AppError("User is deleted", httpStatus.BAD_REQUEST);
             }
 
+            if(!user.isVerified){
+                throw new AppError("User is not verified", httpStatus.BAD_REQUEST)
+            }
+
             // Checking whether requested client role matches any of allowed roles
             if (!authRoles.includes(payload.role)) {
                 throw new AppError("You are not permitted to access this route!", httpStatus.UNAUTHORIZED)

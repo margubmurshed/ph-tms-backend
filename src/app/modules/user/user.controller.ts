@@ -4,9 +4,14 @@ import { UserServices } from "./user.service";
 import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import { JwtPayload } from "jsonwebtoken";
+import { IUser } from "./user.interface";
 
 const createUser = catchAsync(async (req: Request, res: Response) => {
-    const user = await UserServices.createUser(req.body);
+    const payload: IUser = {
+        ...req.body,
+        picture: req.file?.path
+    }
+    const user = await UserServices.createUser(payload);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
@@ -19,7 +24,11 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 const updateUser = catchAsync(async(req: Request, res:Response) => {
     const userId = req.params.id;
     const tokenPayload = req.user;
-    const updatedUser = await UserServices.updateUser(userId, req.body, tokenPayload as JwtPayload);
+    const payload: Partial<IUser> = {
+        ...req.body,
+        picture: req.file?.path
+    }
+    const updatedUser = await UserServices.updateUser(userId, payload, tokenPayload as JwtPayload);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
@@ -42,8 +51,22 @@ const getAllUsers = catchAsync(async(req:Request, res:Response) => {
     })
 })
 
+const getMe = catchAsync(async(req:Request, res:Response) => {
+    const jwtPayload = req.user as JwtPayload;
+    const userId = jwtPayload.userId;
+    const result = await UserServices.getMe(userId);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Logged in user data retrieved successfully!",
+        data: result.data
+    })
+})
+
 export const UserControllers = {
     createUser,
     getAllUsers,
-    updateUser
+    updateUser,
+    getMe
 }

@@ -4,6 +4,7 @@ import checkAuth from "../../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 import validateRequest from "../../../middlewares/validateRequest";
 import { createTourTypeZodSchema, createTourZodSchema, updateTourZodSchema } from "./tour.validation";
+import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
@@ -15,10 +16,32 @@ router.patch("/tour-types/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), validat
 router.delete("/tour-types/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), TourControllers.deleteTourType);
 
 // ----------------- Tours Routes -----------------
-router.post("/create", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), validateRequest(createTourZodSchema) ,TourControllers.createTour);
-router.get("/", TourControllers.getAllTours);
-router.get("/:id", TourControllers.getSingleTour);
-router.patch("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), validateRequest(updateTourZodSchema) ,TourControllers.updateTour);
-router.delete("/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), TourControllers.deleteTour);
+router.post(
+    "/create",
+    checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+    multerUpload.array("files"),
+    validateRequest(createTourZodSchema),
+    TourControllers.createTour
+);
+router.get(
+    "/",
+    TourControllers.getAllTours
+);
+router.get(
+    "/:id",
+    TourControllers.getSingleTour
+);
+router.patch(
+    "/:id",
+    checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+    multerUpload.array("files"),
+    validateRequest(updateTourZodSchema),
+    TourControllers.updateTour
+);
+router.delete(
+    "/:id",
+    checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+    TourControllers.deleteTour
+);
 
 export const TourRoutes = router;

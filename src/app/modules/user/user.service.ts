@@ -8,6 +8,7 @@ import { envVariables } from "../../config/env";
 import hasDisallowedProperties from "../../../utils/hasDisallowedProperties";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
 import { userSearchableFields } from "./user.constant";
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 
 const createUser = async (payload: Partial<IUser>) => {
     const { email, password, ...rest } = payload;
@@ -79,6 +80,9 @@ const updateUser = async (userId: string, payload: Partial<IUser>, tokenPayload:
 
     const updatedUser = await User.findByIdAndUpdate(userId, payload, { new: true, runValidators: true })
 
+    if(payload.picture && userToBeUpdated.picture){
+        await deleteImageFromCloudinary(userToBeUpdated.picture);
+    }
     return updatedUser;
 
 }
@@ -94,8 +98,16 @@ const getAllUsers = async (query: Record<string, string>) => {
     return {data, meta};
 }
 
+const getMe = async(userId: string) => {
+    const user = await User.findById(userId).select("-password");
+    return {
+        data: user
+    }
+}
+
 export const UserServices = {
     createUser,
     getAllUsers,
-    updateUser
+    updateUser,
+    getMe
 }

@@ -77,17 +77,62 @@ const logOut = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-const resetPassword = catchAsync(async (req: Request, res: Response) => {
+const changePassword = catchAsync(async (req: Request, res: Response) => {
     const newPassword = req.body.newPassword;
     const oldPassword = req.body.oldPassword;
     const tokenPayload = req.user as JwtPayload;
 
-    await AuthServices.resetPassword(oldPassword, newPassword, tokenPayload);
+    await AuthServices.changePassword(oldPassword, newPassword, tokenPayload);
 
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
         message: "Password has been reset successfully!",
+        data: null
+    })
+})
+
+const setPassword = catchAsync(async(req: Request, res: Response) => {
+    const password = req.body.password;
+    const jwtPayload = req.user as JwtPayload;
+
+    await AuthServices.setPassword(jwtPayload.userId, password);
+
+    sendResponse(res, {
+        success: true,
+        message: "Password has been set successfully!",
+        statusCode: httpStatus.OK,
+        data: null
+    })
+})
+
+const forgetPassword = catchAsync(async(req: Request, res: Response) => {
+    const {email} = req.body;
+
+    await AuthServices.forgetPassword(email);
+
+    sendResponse(res, {
+        success: true,
+        message: "If user exists, an email with reset password link has been set to your email.",
+        statusCode: httpStatus.OK,
+        data: null
+    })
+})
+
+const resetPassword = catchAsync(async(req: Request, res: Response) => {
+    const {password} = req.body;
+    const resetPasswordToken = req.headers.authorization;
+
+    if (!resetPasswordToken) {
+        throw new AppError("No access token received!", httpStatus.UNAUTHORIZED);
+    }
+
+    await AuthServices.resetPassword(password, resetPasswordToken);
+
+    sendResponse(res, {
+        success: true,
+        message: "Password has been reset successfully!",
+        statusCode: httpStatus.OK,
         data: null
     })
 })
@@ -112,6 +157,9 @@ export const AuthControllers = {
     credentialsLogin,
     getNewAccessToken,
     logOut,
+    changePassword,
+    setPassword,
+    forgetPassword,
     resetPassword,
     googleCallbackController
 }
