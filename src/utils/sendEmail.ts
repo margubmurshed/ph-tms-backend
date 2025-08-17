@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { createTransport } from "nodemailer";
 import { envVariables } from "../app/config/env";
 import path from "path";

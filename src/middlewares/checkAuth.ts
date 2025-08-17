@@ -32,7 +32,7 @@ const checkAuth = (...authRoles: Role[]) => {
             }
 
             if(!user.isVerified){
-                throw new AppError("User is not verified", httpStatus.BAD_REQUEST)
+                throw new AppError("User is not verified", httpStatus.UNAUTHORIZED)
             }
 
             // Checking whether requested client role matches any of allowed roles
