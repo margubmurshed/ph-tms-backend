@@ -25,4 +25,5 @@ export interface ITour{
     division: Types.ObjectId; // Reference to the division
     tourType: Types.ObjectId; // Reference to the tour type
     deletedImages: string[];
+    user: Types.ObjectId;
 }

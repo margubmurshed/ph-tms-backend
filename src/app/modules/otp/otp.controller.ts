@@ -4,8 +4,8 @@ import httpStatus from "http-status-codes";
 import { otpServices } from "./otp.service";
 
 const sendOTP = async(req: Request, res: Response) => {
-    const {email, name} = req.body;
-    await otpServices.sendOTP(email, name)
+    const {email} = req.body;
+    await otpServices.sendOTP(email)
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,

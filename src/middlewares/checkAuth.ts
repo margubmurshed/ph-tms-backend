@@ -10,7 +10,7 @@ import { User } from "../app/modules/user/user.model";
 const checkAuth = (...authRoles: Role[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const accessToken = req.headers.authorization;
+            const accessToken = req.headers.authorization || req.cookies.accessToken;
 
             if (!accessToken) {
                 throw new AppError("No access token received!", httpStatus.UNAUTHORIZED);

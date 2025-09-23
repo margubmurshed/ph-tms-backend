@@ -19,7 +19,10 @@ router.delete("/tour-types/:id", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), TourCo
 router.post(
     "/create",
     checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-    multerUpload.array("files"),
+    multerUpload.fields([
+        { name: "images" },
+        { name: "thumbnail", maxCount: 1 }
+    ]),
     validateRequest(createTourZodSchema),
     TourControllers.createTour
 );

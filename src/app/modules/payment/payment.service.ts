@@ -122,17 +122,17 @@ const failPayment = async (query: Record<string, string>) => {
             { runValidators: true }
         ).session(session)
 
-        session.commitTransaction()
+        await session.commitTransaction()
         return {
             success: false,
             message: "Payment Failed!"
         }
 
     } catch (error) {
-        session.abortTransaction();
+        await session.abortTransaction();
         throw error;
     } finally {
-        session.endSession();
+        await session.endSession();
     }
 }
 
@@ -153,17 +153,17 @@ const cancelPayment = async (query: Record<string, string>) => {
             { runValidators: true }
         ).session(session)
 
-        session.commitTransaction()
+        await session.commitTransaction()
         return {
             success: false,
             message: "Payment Cancelled!"
         }
 
     } catch (error) {
-        session.abortTransaction();
+        await session.abortTransaction();
         throw error;
     } finally {
-        session.endSession();
+        await session.endSession();
     }
 }
 

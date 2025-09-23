@@ -15,7 +15,7 @@ const credentialsLogin = catchAsync(async (req: Request, res: Response, next: Ne
 
     passport.authenticate("local", (error: any, user: any, info: any) => {
         if (error) {
-            return next(new AppError(error, httpStatus.BAD_REQUEST))
+            return next(new AppError(error, httpStatus.UNAUTHORIZED))
         }
 
         if (!user) {
@@ -30,10 +30,7 @@ const credentialsLogin = catchAsync(async (req: Request, res: Response, next: Ne
             success: true,
             statusCode: httpStatus.OK,
             message: "User Logged In Successfully!",
-            data: {
-                ...userTokens,
-                user
-            }
+            data: user
         })
 
     })(req, res, next)
@@ -53,20 +50,20 @@ const getNewAccessToken = catchAsync(async (req: Request, res: Response) => {
         success: true,
         statusCode: httpStatus.OK,
         message: "New access token created successfully!",
-        data: tokenInfo
+        data: null
     })
 })
 
 const logOut = catchAsync(async (req: Request, res: Response) => {
     res.clearCookie("accessToken", {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax"
+        secure: true,
+        sameSite: "none"
     })
     res.clearCookie("refreshToken", {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax"
+        secure: true,
+        sameSite: "none"
     })
 
     sendResponse(res, {
@@ -121,7 +118,7 @@ const forgetPassword = catchAsync(async(req: Request, res: Response) => {
 
 const resetPassword = catchAsync(async(req: Request, res: Response) => {
     const {password} = req.body;
-    const resetPasswordToken = req.headers.authorization;
+    const resetPasswordToken = req.headers.authorization || req.cookies.accessToken;
 
     if (!resetPasswordToken) {
         throw new AppError("No access token received!", httpStatus.UNAUTHORIZED);

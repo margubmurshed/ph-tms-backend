@@ -91,6 +91,11 @@ const tourSchema = new Schema<ITour>({
         type: Schema.Types.ObjectId,
         ref: "TourType",
         required: true
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     }
 },{
     timestamps: true,

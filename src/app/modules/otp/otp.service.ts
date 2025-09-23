@@ -11,10 +11,10 @@ const generateOTP = (length = 6) => {
     return crypto.randomInt(10 ** (length - 1), 10 ** length);
 }
 
-const sendOTP = async (email: string, name: string) => {
+const sendOTP = async (email: string) => {
     const user = await User.findOne({email});
     if(!user) throw new AppError("User not found", httpStatus.NOT_FOUND);
-    if(!user.isVerified) throw new AppError("You are already verified!", httpStatus.BAD_REQUEST);
+    if(user.isVerified) throw new AppError("You are already verified!", httpStatus.BAD_REQUEST);
 
     const otp = generateOTP();
     const redisKey = `otp:${email}`
@@ -30,7 +30,7 @@ const sendOTP = async (email: string, name: string) => {
         templateData: {
             logoUrl: "https://i.ibb.co.com/99n30ccq/logo.png",
             date: new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' }),
-            name: name,
+            name: user.name,
             otp
         }
     })

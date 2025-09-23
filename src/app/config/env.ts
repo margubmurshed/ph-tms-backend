@@ -43,7 +43,7 @@ interface envVariablesTypes {
         SMTP_FROM: string;
         SMTP_USER: string;
     },
-    
+
     REDIS: {
         REDIS_HOST: string;
         REDIS_PORT: string;
@@ -90,9 +90,9 @@ function loadEnvVariables(): envVariablesTypes {
         "SMTP_FROM",
         "SMTP_USER",
         "REDIS_HOST",
-"REDIS_PORT",
-"REDIS_PASSWORD",
-"REDIS_USERNAME",
+        "REDIS_PORT",
+        "REDIS_PASSWORD",
+        "REDIS_USERNAME",
     ];
     requiredEnvVariables.forEach(key => {
         if (!process.env[key]) {
